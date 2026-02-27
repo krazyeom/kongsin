@@ -89,8 +89,21 @@ const btnEnable = document.getElementById('btn-enable');
 const btnDelete = document.getElementById('btn-delete');
 const btnRestore = document.getElementById('btn-restore');
 const btnKongsin = document.getElementById('btn-kongsin');
+const btnHelp = document.getElementById('btn-help');
 
 let wasConnected = false;
+
+// 모달 초기화 (Bootstrap)
+let helpModalInstance = null;
+if (typeof bootstrap !== 'undefined') {
+    helpModalInstance = new bootstrap.Modal(document.getElementById('helpModal'));
+}
+
+if (btnHelp && helpModalInstance) {
+    btnHelp.addEventListener('click', () => {
+        helpModalInstance.show();
+    });
+}
 
 // 주기적 장치 확인
 setInterval(async () => {
