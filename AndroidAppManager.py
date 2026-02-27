@@ -43,6 +43,9 @@ class AndroidAppManager:
         self.btn_enable = ttk.Button(top_frame, text="✅ 다시 활성화", command=self.enable_app)
         self.btn_enable.pack(side=tk.LEFT, padx=5)
 
+        self.btn_kongsin = ttk.Button(top_frame, text="🎓 공신폰 방해앱 자동선택", command=self.select_kongsin_apps)
+        self.btn_kongsin.pack(side=tk.LEFT, padx=20)
+
         # 검색 영역
         search_frame = ttk.Frame(root, padding=(10, 0, 10, 10))
         search_frame.pack(fill=tk.X)
@@ -89,6 +92,44 @@ class AndroidAppManager:
         self.all_apps.sort()
         self.update_listbox(self.all_apps)
         messagebox.showinfo("성공", f"총 {len(self.all_apps)}개의 앱을 불러왔습니다.")
+
+    def select_kongsin_apps(self):
+        # 공신폰을 만들기 위해 비활성화해야 할 대표적인 방해 앱 패키지 목록
+        kongsin_apps = [
+            # 스토어류
+            "com.android.vending",             # Google Play Store
+            "com.skt.skaf.A000Z00040",         # SKT One Store
+            "net.onestore.store",              # One Store (KT, LGU+)
+            "com.sec.android.app.samsungapps", # Galaxy Store
+            
+            # 동영상 / 미디어류
+            "com.google.android.youtube",      # YouTube
+            "com.google.android.apps.youtube.music", # YouTube Music
+            "com.netflix.mediaclient",         # Netflix
+            "com.zhiliaoapp.musically",        # TikTok
+            "com.ss.android.ugc.trill",        # TikTok
+            
+            # 브라우저류
+            "com.android.chrome",              # Chrome
+            "com.sec.android.app.sbrowser",    # Samsung Internet
+            
+            # SNS류
+            "com.instagram.android",           # Instagram
+            "com.facebook.katana",             # Facebook
+            "com.twitter.android",             # Twitter/X
+        ]
+        
+        found_count = 0
+        for app in kongsin_apps:
+            if app in self.all_apps:
+                self.checked_apps.add(app)
+                found_count += 1
+                
+        if found_count > 0:
+            self.filter_list() # 리스트 갱신 (체크상태 화면에 반영)
+            messagebox.showinfo("공신폰 모드 준비", f"스터디 방해 앱 {found_count}개를 자동으로 체크했습니다!\n\n이제 [🚫 비활성화] 버튼을 눌러주시면 폰에서 사라집니다.")
+        else:
+            messagebox.showwarning("알림", "폰에서 해당되는 방해 앱을 찾을 수 없습니다. (이미 없거나 비활성화 상태일 수 있습니다)")
 
     def toggle_check(self, event):
         item = self.tree.identify_row(event.y)
