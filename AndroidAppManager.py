@@ -23,7 +23,7 @@ class AndroidAppManager:
     def __init__(self, root):
         self.root = root
         self.root.title("안드로이드 기본 앱 정리기")
-        self.root.geometry("500x600")
+        self.root.geometry("650x700")
         
         # 깔끔한 테마 적용
         style = ttk.Style()
@@ -43,8 +43,21 @@ class AndroidAppManager:
         self.btn_enable = ttk.Button(top_frame, text="✅ 다시 활성화", command=self.enable_app)
         self.btn_enable.pack(side=tk.LEFT, padx=5)
 
-        self.btn_kongsin = ttk.Button(top_frame, text="🎓 공신폰 방해앱 자동선택", command=self.select_kongsin_apps)
-        self.btn_kongsin.pack(side=tk.LEFT, padx=20)
+        self.btn_delete = ttk.Button(top_frame, text="🗑 완전 삭제", command=self.delete_app)
+        self.btn_delete.pack(side=tk.LEFT, padx=5)
+
+        self.btn_restore = ttk.Button(top_frame, text="♻️ 완전 복원", command=self.restore_app)
+        self.btn_restore.pack(side=tk.LEFT, padx=5)
+
+        # 프리셋 버튼 영역
+        preset_frame = ttk.Frame(root, padding=(10, 0, 10, 10))
+        preset_frame.pack(fill=tk.X)
+
+        self.btn_kongsin = ttk.Button(preset_frame, text="🎓 공신폰 모드 (방해앱 선택)", command=self.select_kongsin_apps)
+        self.btn_kongsin.pack(side=tk.LEFT, padx=5)
+
+        self.btn_delete_preset = ttk.Button(preset_frame, text="🧹 삼성/구글 기본앱 (삭제용 선택)", command=self.select_delete_apps)
+        self.btn_delete_preset.pack(side=tk.LEFT, padx=5)
 
         # 검색 영역
         search_frame = ttk.Frame(root, padding=(10, 0, 10, 10))
@@ -83,7 +96,8 @@ class AndroidAppManager:
         self.checked_apps = set()
 
     def load_apps(self):
-        output = run_adb_command("shell pm list packages")
+        # -u 인자를 추가하여 비활성화/삭제된 언인스톨 상태의 기본 앱도 모두 가져옵니다 (복원을 위함)
+        output = run_adb_command("shell pm list packages -u")
         
         self.all_apps = []
         self.checked_apps.clear()
@@ -144,9 +158,43 @@ class AndroidAppManager:
         if found_count > 0:
             self.filter_list() # 리스트 갱신 (체크상태 화면에 반영)
             self.update_selected_count_label()
-            messagebox.showinfo("공신폰 모드 준비", f"스터디 방해 앱 {found_count}개를 자동으로 체크했습니다!\n\n이제 [🚫 비활성화] 버튼을 눌러주시면 폰에서 사라집니다.")
+            messagebox.showinfo("공신폰 모드 준비", f"스터디 방해 앱 {found_count}개를 자동으로 체크했습니다!\n\n이제 상단의 [🚫 비활성화] 버튼을 눌러주시면 폰에서 사라집니다.")
         else:
             messagebox.showwarning("알림", "폰에서 해당되는 방해 앱을 찾을 수 없습니다. (이미 없거나 비활성화 상태일 수 있습니다)")
+
+    def select_delete_apps(self):
+        # 완전 삭제가 필요한 삼성/구글 등 기본 잉여앱 목록
+        delete_apps = [
+            "com.samsung.android.bixby.wakeup",        # 빅스비
+            "com.samsung.android.bixby.agent",         # 빅스비
+            "com.samsung.android.bixby.visionapp",     # 빅스비 비전
+            "com.samsung.android.arzone",              # AR 존
+            "com.samsung.android.ardrawing",           # AR 두들
+            "com.samsung.android.aremoji",             # AR 이모지
+            "com.samsung.android.aremojieditor",       # AR 이모지
+            "com.sec.android.mimage.avatarstickers",   # AR 이모지 스티커
+            "com.google.android.gm",                   # Gmail
+            "com.google.android.googlequicksearchbox", # Google
+            "com.android.vending",                     # Google Play 스토어
+            "com.google.android.apps.tachyon",         # Google Meet / Duo
+            "com.google.android.apps.meetings",        # Google Meet
+            "com.samsung.android.app.spage",           # Samsung Free
+            "com.google.android.youtube",              # Youtube
+            "com.google.android.apps.youtube.music"    # Youtube music
+        ]
+        
+        found_count = 0
+        for app in delete_apps:
+            if app in self.all_apps:
+                self.checked_apps.add(app)
+                found_count += 1
+                
+        if found_count > 0:
+            self.filter_list()
+            self.update_selected_count_label()
+            messagebox.showinfo("삭제 목록 준비", f"삼성/구글 기본 앱 {found_count}개를 찾아 체크했습니다!\n\n이제 [🗑 완전 삭제] 버튼을 누르시면 폰에서 언인스톨됩니다.")
+        else:
+            messagebox.showwarning("알림", "폰에서 삭제될 잉여 앱을 찾을 수 없습니다. (이미 지워진 폰일 수 있습니다)")
 
     def toggle_check(self, event):
         item = self.tree.identify_row(event.y)
@@ -229,6 +277,60 @@ class AndroidAppManager:
                 messagebox.showwarning("결과", res_msg)
             else:
                 messagebox.showinfo("성공", res_msg + "\n모든 앱이 활성화 되었습니다.")
+
+    def delete_app(self):
+        pkgs = self.get_selected_apps()
+        if not pkgs: return
+        
+        msg = f"선택한 {len(pkgs)}개의 앱을 기기에서 **'완전 삭제(Uninstall)'** 하시겠습니까?\n\n(완전 삭제 시 폰을 공장 초기화하지 않는 이상 복구가 어려울 수 있습니다. 무조건 신중하게 진행하세요!)"
+        if messagebox.askyesno("⚠️ 강력 경고: 완전 삭제 ⚠️", msg):
+            success_count = 0
+            fail_list = []
+            
+            for pkg in pkgs:
+                # --user 0 으로 메인 유저에게서 완전 삭제 (시스템 앱 언인스톨 트릭)
+                result = run_adb_command(f"shell pm uninstall -k --user 0 {pkg}")
+                if "success" in result.lower():
+                    success_count += 1
+                else:
+                    fail_list.append(pkg)
+            
+            res_msg = f"삭제 완료: {success_count}개\n"
+            if fail_list:
+                res_msg += f"실패: {len(fail_list)}개\n\n(시스템 보호용 핵심 앱이라 지울 수 없거나 이미 지워졌을 수 있습니다)"
+                messagebox.showwarning("결과", res_msg)
+            else:
+                messagebox.showinfo("성공", res_msg + "\n성공적으로 앱이 삭제되었습니다.")
+                
+            # 삭제 직후 앱 리스트를 다시 불러와 화면 갱신
+            self.load_apps()
+
+    def restore_app(self):
+        pkgs = self.get_selected_apps()
+        if not pkgs: return
+        
+        msg = f"선택한 {len(pkgs)}개의 앱을 기기에서 **'완전 복원(Install existing)'** 하시겠습니까?\n\n(완전 삭제했던 기본 시스템 앱을 다시 설치합니다.)"
+        if messagebox.askyesno("복원 확인", msg):
+            success_count = 0
+            fail_list = []
+            
+            for pkg in pkgs:
+                # 삭제된 내부 시스템 앱을 현재 사용자에 맞게 다시 복구
+                result = run_adb_command(f"shell cmd package install-existing {pkg}")
+                if "installed" in result.lower() or "success" in result.lower():
+                    success_count += 1
+                else:
+                    fail_list.append(pkg)
+            
+            res_msg = f"복원 완료: {success_count}개\n"
+            if fail_list:
+                res_msg += f"실패: {len(fail_list)}개\n\n(기본 내장이 아닌 사용자가 직접 설치했던 일반 앱은 이 기능으로 복구할 수 없습니다. 플레이스토어에서 다시 받아야 합니다.)"
+                messagebox.showwarning("결과", res_msg)
+            else:
+                messagebox.showinfo("성공", res_msg + "\n선택한 앱이 원래대로 폰에 복원되었습니다.")
+                
+            # 복원 직후 앱 리스트 갱신
+            self.load_apps()
 
 if __name__ == "__main__":
     root = tk.Tk()
