@@ -19,7 +19,7 @@ for (const p of ADB_PATHS) {
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
-        width: 800,
+        width: 850,
         height: 800,
         title: "공신폰 앱 매니저 by krazyeom",
         webPreferences: {
