@@ -53,13 +53,21 @@ const criticalSystemApps = [
     "com.android.providers.settings",
     "com.samsung.android.dialer",
     "com.samsung.android.messaging",
-    "com.sec.android.app.launcher"
+    "com.sec.android.app.launcher",
+    "com.android.bluetooth",
+    "com.android.nfc",
+    "com.android.se",
+    "com.samsung.android.incallui",
+    "com.android.incallui",
+    "com.samsung.android.networkdiagnostic",
+    "com.samsung.android.knox.containercore",
+    "com.android.keyguard"
 ];
 
 function isCriticalApp(pkg) {
     if (criticalSystemApps.includes(pkg)) return true;
     // 패키지명에 아래 키워드가 포함되면 중요 시스템 앱으로 간주
-    if (pkg.includes("systemui") || pkg.includes("com.android.providers.") || pkg.includes("com.android.phone")) {
+    if (pkg.includes("systemui") || pkg.includes("com.android.providers.") || pkg.includes("com.android.phone") || pkg.includes("com.android.bluetooth") || pkg.includes("com.android.camera") || pkg.includes("network") || pkg.includes("telecom")) {
         return true;
     }
     return false;
