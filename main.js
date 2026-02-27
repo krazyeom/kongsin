@@ -21,7 +21,7 @@ function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 800,
         height: 800,
-        title: "안드로이드 기본 앱 정리기",
+        title: "공신폰 앱 매니저 by krazyeom",
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false // 간소화를 위해 isolation 해제

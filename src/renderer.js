@@ -43,6 +43,28 @@ const appNameMap = {
     "com.samsung.android.app.tips": "삼성 팁 (도움말)"
 };
 
+// 절대로 삭제하거나 비활성화하면 안 되는 핵심 시스템 앱 키워드 및 패키지
+const criticalSystemApps = [
+    "android",
+    "com.android.systemui",
+    "com.android.settings",
+    "com.android.phone",
+    "com.android.server.telecom",
+    "com.android.providers.settings",
+    "com.samsung.android.dialer",
+    "com.samsung.android.messaging",
+    "com.sec.android.app.launcher"
+];
+
+function isCriticalApp(pkg) {
+    if (criticalSystemApps.includes(pkg)) return true;
+    // 패키지명에 아래 키워드가 포함되면 중요 시스템 앱으로 간주
+    if (pkg.includes("systemui") || pkg.includes("com.android.providers.") || pkg.includes("com.android.phone")) {
+        return true;
+    }
+    return false;
+}
+
 // Elements
 const btnLoad = document.getElementById('btn-load');
 const statusDot = document.getElementById('status-dot');
@@ -136,34 +158,47 @@ function renderList(listToRender) {
 
     tbody.innerHTML = '';
     listToRender.forEach(app => {
+        const isCritical = isCriticalApp(app);
         const tr = document.createElement('tr');
-        const isChecked = checkedApps.has(app);
+        const isChecked = checkedApps.has(app) && !isCritical;
         
         if (isChecked) tr.classList.add('selected-row');
+        if (isCritical) tr.classList.add('bg-light');
         
         const appName = appNameMap[app] || "-";
 
+        const checkboxHtml = isCritical 
+            ? `<i class="fas fa-lock text-danger" title="삭제 방지된 핵심 앱"></i>`
+            : `<input class="form-check-input check-lg cursor-pointer row-check" type="checkbox" data-pkg="${app}" ${isChecked ? 'checked' : ''}>`;
+
         tr.innerHTML = `
             <td class="text-center">
-                <input class="form-check-input check-lg cursor-pointer row-check" type="checkbox" data-pkg="${app}" ${isChecked ? 'checked' : ''}>
+                ${checkboxHtml}
             </td>
-            <td class="fw-bold">${app}</td>
-            <td class="text-muted">${appName}</td>
+            <td class="fw-bold ${isCritical ? 'text-danger' : ''}">${app}</td>
+            <td class="text-muted">${appName} ${isCritical ? '<span class="badge bg-danger ms-2">필수 시스템</span>' : ''}</td>
         `;
 
         // 행(Row) 전체 클릭 시 체크박스 토글
         tr.addEventListener('click', (e) => {
+            if (isCritical) return; // 필수 앱은 클릭 무시
             if (e.target.type !== 'checkbox') {
                 const cb = tr.querySelector('.row-check');
-                cb.checked = !cb.checked;
-                toggleCheck(app, cb.checked, tr);
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    toggleCheck(app, cb.checked, tr);
+                }
             }
         });
 
-        const cb = tr.querySelector('.row-check');
-        cb.addEventListener('change', (e) => {
-            toggleCheck(app, e.target.checked, tr);
-        });
+        if (!isCritical) {
+            const cb = tr.querySelector('.row-check');
+            if (cb) {
+                cb.addEventListener('change', (e) => {
+                    toggleCheck(app, e.target.checked, tr);
+                });
+            }
+        }
 
         tbody.appendChild(tr);
     });
