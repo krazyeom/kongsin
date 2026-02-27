@@ -1,0 +1,91 @@
+body {
+    background-color: #f8fafc;
+    font-family: 'Consolas', 'Courier New', 'Pretendard', sans-serif;
+    color: #1e293b;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+}
+
+.check-lg {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+    border-radius: 0 !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.selected-row {
+    background-color: #eff6ff !important;
+}
+
+.status-indicator {
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+}
+
+.count-badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    background-color: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+}
+
+.count-badge.active {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+#list-container {
+    max-height: calc(100vh - 290px);
+    border: 1px solid #cbd5e1;
+    overflow-y: auto;
+}
+
+/* Custom Scrollbar - sharp and simple */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-left: 1px solid #e2e8f0;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+.table {
+    border-color: #e2e8f0;
+}
+
+.table-primary-header {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+.table-primary-header th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f1f5f9;
+}

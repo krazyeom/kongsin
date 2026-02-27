@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>안드로이드 앱 정리기 2.0</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container-fluid py-3 h-100 d-flex flex-column">
+    <!-- Header Title -->
+    <div class="row mb-3">
+      <div class="col d-flex justify-content-between align-items-end border-bottom border-secondary-subtle pb-2">
+        <h4 class="mb-0 fw-bold text-primary">Kongsin App Manager <span
+            class="badge bg-primary rounded-0 ms-2">2.0</span>
+        </h4>
+        <small class="text-muted fw-bold">by krazyeom</small>
+      </div>
+    </div>
+
+    <!-- 1st Row: Header & Status -->
+    <div class="row mb-3 align-items-center">
+      <div class="col-auto">
+        <button class="btn btn-primary px-3 py-2 rounded-0 fw-bold" id="btn-load">
+          <i class="fas fa-plug me-2"></i>기기에서 앱 불러오기
+        </button>
+      </div>
+      <div class="col">
+        <div class="status-indicator d-inline-flex align-items-center px-3 py-2 rounded-0" id="status-indicator">
+          <div class="status-dot bg-warning" id="status-dot"></div>
+          <span class="ms-2 fw-bold" id="status-text">상태 확인 중...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2nd Row: Actions -->
+    <div class="row mb-3">
+      <div class="col">
+        <div class="border border-secondary-subtle p-2 bg-white d-flex flex-wrap gap-2 shadow-sm">
+          <button class="btn btn-outline-warning text-dark fw-bold rounded-0 action-btn" id="btn-disable">
+            비활성화 (숨기기)
+          </button>
+          <button class="btn btn-outline-success fw-bold rounded-0 action-btn" id="btn-enable">
+            다시 활성화
+          </button>
+          <button class="btn btn-outline-danger fw-bold ms-auto rounded-0 action-btn" id="btn-delete">
+            완전 삭제
+          </button>
+          <button class="btn btn-outline-info fw-bold rounded-0 text-dark action-btn" id="btn-restore">
+            완전 복원
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3rd Row: Presets -->
+    <div class="row mb-3">
+      <div class="col">
+        <div class="border border-primary border-opacity-50 bg-primary bg-opacity-10 p-2 rounded-0">
+          <button class="btn btn-primary w-100 fw-bold rounded-0 py-2 shadow-sm" id="btn-kongsin">
+            <i class="fas fa-check-square me-2"></i>공신폰 모드 전용 (방해앱 + 잉여앱 일괄 체크)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4th Row: Search & Count -->
+    <div class="row mb-2 align-items-center">
+      <div class="col-8">
+        <div class="input-group shadow-sm">
+          <span class="input-group-text bg-white border-secondary-subtle rounded-0 border-end-0"><i
+              class="fas fa-search text-muted"></i></span>
+          <input type="text" class="form-control border-secondary-subtle rounded-0 border-start-0 ps-0 shadow-none"
+            id="search-input" placeholder="패키지 또는 앱 이름 검색 (예: youtube, 삼성)">
+        </div>
+      </div>
+      <div class="col-4 text-end">
+        <span class="badge count-badge rounded-0" id="selected-count">0개 선택됨</span>
+      </div>
+    </div>
+
+    <!-- 5th Row: List Area -->
+    <div class="row flex-grow-1 overflow-hidden pb-2">
+      <div class="col h-100">
+        <div class="bg-white h-100 shadow-sm" id="list-container">
+          <table class="table table-hover align-middle mb-0" id="app-table">
+            <thead class="table-primary-header sticky-top shadow-sm">
+              <tr>
+                <th scope="col" style="width: 50px;" class="text-center">
+                  <input class="form-check-input check-lg cursor-pointer rounded-0 border-secondary" type="checkbox"
+                    id="check-all">
+                </th>
+                <th scope="col" style="width: 50%;">패키지 이름</th>
+                <th scope="col">앱 이름</th>
+              </tr>
+            </thead>
+            <tbody id="app-list-body">
+              <tr>
+                <td colspan="3" class="text-center text-muted py-5">
+                  <i class="fas fa-terminal mb-3" style="font-size: 2rem;"></i><br>
+                  좌측 상단의 <b>'기기에서 앱 불러오기'</b> 버튼을 눌러주세요.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+
+</html>

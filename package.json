@@ -1,0 +1,32 @@
+{
+  "name": "kongsin-app",
+  "version": "2.0.0",
+  "description": "Android App Manager built with Electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win --x64",
+    "build:win:all": "electron-builder --win --x64 --arm64",
+    "build:all": "electron-builder -mw"
+  },
+  "keywords": [],
+  "author": "krazyeom",
+  "license": "ISC",
+  "build": {
+    "appId": "com.krazyeom.kongsin",
+    "productName": "Kongsin App Manager",
+    "mac": {
+      "target": "zip",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^34.1.1",
+    "electron-builder": "^25.1.8"
+  }
+}
