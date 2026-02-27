@@ -180,7 +180,9 @@ class AndroidAppManager:
             "com.google.android.apps.meetings",        # Google Meet
             "com.samsung.android.app.spage",           # Samsung Free
             "com.google.android.youtube",              # Youtube
-            "com.google.android.apps.youtube.music"    # Youtube music
+            "com.google.android.apps.youtube.music",   # Youtube music
+            "com.samsung.android.game.gamehome",       # 삼성 게임런처
+            "com.samsung.android.app.tips"             # 삼성 팁 (도움말)
         ]
         
         found_count = 0
