@@ -60,11 +60,8 @@ class AndroidAppManager:
         preset_frame = ttk.Frame(root, padding=(10, 0, 10, 10))
         preset_frame.pack(fill=tk.X)
 
-        self.btn_kongsin = ttk.Button(preset_frame, text="🎓 공신폰 모드 (방해앱 선택)", command=self.select_kongsin_apps)
+        self.btn_kongsin = ttk.Button(preset_frame, text="🎓 공신폰 모드 전용 (방해앱+잉여앱 모두 체크)", command=self.select_kongsin_apps)
         self.btn_kongsin.pack(side=tk.LEFT, padx=5)
-
-        self.btn_delete_preset = ttk.Button(preset_frame, text="🧹 삼성/구글 기본앱 (삭제용 선택)", command=self.select_delete_apps)
-        self.btn_delete_preset.pack(side=tk.LEFT, padx=5)
 
         # 검색 영역
         search_frame = ttk.Frame(root, padding=(10, 0, 10, 10))
@@ -152,7 +149,7 @@ class AndroidAppManager:
             self.lbl_selected_count.config(text="0개가 선택되었습니다.", fg="gray")
 
     def select_kongsin_apps(self):
-        # 공신폰을 만들기 위해 비활성화해야 할 대표적인 방해 앱 패키지 목록
+        # 공신폰을 만들기 위해 비활성화/삭제해야 할 방해 앱 및 안 쓰는 잉여 앱 패키지 목록
         kongsin_apps = [
             # 스토어류
             "com.android.vending",             # Google Play Store
@@ -175,6 +172,25 @@ class AndroidAppManager:
             "com.instagram.android",           # Instagram
             "com.facebook.katana",             # Facebook
             "com.twitter.android",             # Twitter/X
+            
+            # 삼성/구글 잉여앱 (빅스비, AR, 기본앱 등)
+            "com.samsung.android.bixby.wakeup",        # 빅스비
+            "com.samsung.android.bixby.agent",         # 빅스비
+            "com.samsung.android.bixby.visionapp",     # 빅스비 비전 (추가)
+            "com.samsung.android.themestore",          # 갤럭시 테마 (추가)
+            "com.google.android.apps.maps",            # 구글 지도 (추가)
+            "com.samsung.android.arzone",              # AR 존
+            "com.samsung.android.ardrawing",           # AR 두들
+            "com.samsung.android.aremoji",             # AR 이모지
+            "com.samsung.android.aremojieditor",       # AR 이모지
+            "com.sec.android.mimage.avatarstickers",   # AR 이모지 스티커
+            "com.google.android.gm",                   # Gmail
+            "com.google.android.googlequicksearchbox", # Google
+            "com.google.android.apps.tachyon",         # Google Meet / Duo
+            "com.google.android.apps.meetings",        # Google Meet
+            "com.samsung.android.app.spage",           # Samsung Free
+            "com.samsung.android.game.gamehome",       # 삼성 게임런처
+            "com.samsung.android.app.tips"             # 삼성 팁 (도움말)
         ]
         
         found_count = 0
@@ -186,45 +202,9 @@ class AndroidAppManager:
         if found_count > 0:
             self.filter_list() # 리스트 갱신 (체크상태 화면에 반영)
             self.update_selected_count_label()
-            messagebox.showinfo("공신폰 모드 준비", f"스터디 방해 앱 {found_count}개를 자동으로 체크했습니다!\n\n이제 상단의 [🚫 비활성화] 버튼을 눌러주시면 폰에서 사라집니다.")
+            messagebox.showinfo("공신폰 모드 준비", f"방해앱 및 잉여앱 {found_count}개를 자동으로 찾아 체크했습니다!\n\n이제 [🚫 비활성화] 혹은 [🗑 완전 삭제] 버튼 중 원하시는 것을 눌러주세요.")
         else:
-            messagebox.showwarning("알림", "폰에서 해당되는 방해 앱을 찾을 수 없습니다. (이미 없거나 비활성화 상태일 수 있습니다)")
-
-    def select_delete_apps(self):
-        # 완전 삭제가 필요한 삼성/구글 등 기본 잉여앱 목록
-        delete_apps = [
-            "com.samsung.android.bixby.wakeup",        # 빅스비
-            "com.samsung.android.bixby.agent",         # 빅스비
-            "com.samsung.android.bixby.visionapp",     # 빅스비 비전
-            "com.samsung.android.arzone",              # AR 존
-            "com.samsung.android.ardrawing",           # AR 두들
-            "com.samsung.android.aremoji",             # AR 이모지
-            "com.samsung.android.aremojieditor",       # AR 이모지
-            "com.sec.android.mimage.avatarstickers",   # AR 이모지 스티커
-            "com.google.android.gm",                   # Gmail
-            "com.google.android.googlequicksearchbox", # Google
-            "com.android.vending",                     # Google Play 스토어
-            "com.google.android.apps.tachyon",         # Google Meet / Duo
-            "com.google.android.apps.meetings",        # Google Meet
-            "com.samsung.android.app.spage",           # Samsung Free
-            "com.google.android.youtube",              # Youtube
-            "com.google.android.apps.youtube.music",   # Youtube music
-            "com.samsung.android.game.gamehome",       # 삼성 게임런처
-            "com.samsung.android.app.tips"             # 삼성 팁 (도움말)
-        ]
-        
-        found_count = 0
-        for app in delete_apps:
-            if app in self.all_apps:
-                self.checked_apps.add(app)
-                found_count += 1
-                
-        if found_count > 0:
-            self.filter_list()
-            self.update_selected_count_label()
-            messagebox.showinfo("삭제 목록 준비", f"삼성/구글 기본 앱 {found_count}개를 찾아 체크했습니다!\n\n이제 [🗑 완전 삭제] 버튼을 누르시면 폰에서 언인스톨됩니다.")
-        else:
-            messagebox.showwarning("알림", "폰에서 삭제될 잉여 앱을 찾을 수 없습니다. (이미 지워진 폰일 수 있습니다)")
+            messagebox.showwarning("알림", "폰에서 처리 대상인 앱을 하나도 찾을 수 없습니다. (이미 처리되었거나 없는 폰일 수 있습니다)")
 
     def toggle_check(self, event):
         item = self.tree.identify_row(event.y)
