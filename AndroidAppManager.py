@@ -23,30 +23,37 @@ class AndroidAppManager:
     def __init__(self, root):
         self.root = root
         self.root.title("안드로이드 기본 앱 정리기")
-        self.root.geometry("650x700")
+        self.root.geometry("750x700")
         
         # 깔끔한 테마 적용
         style = ttk.Style()
         if "clam" in style.theme_names():
             style.theme_use("clam")
 
-        # 상단 버튼 영역
+        # 상단 버튼 영역 (불러오기 및 상태 표시)
         top_frame = ttk.Frame(root, padding=10)
         top_frame.pack(fill=tk.X)
 
         self.btn_load = ttk.Button(top_frame, text="📲 기기에서 앱 불러오기", command=self.load_apps)
         self.btn_load.pack(side=tk.LEFT, padx=5)
 
-        self.btn_disable = ttk.Button(top_frame, text="🚫 비활성화 (숨기기)", command=self.disable_app)
+        self.lbl_status = tk.Label(top_frame, text="상태 확인 중...", font=("Helvetica", 14, "bold"))
+        self.lbl_status.pack(side=tk.LEFT, padx=20)
+
+        # 기능 버튼 영역 (다양한 액션)
+        action_frame = ttk.Frame(root, padding=(10, 0, 10, 10))
+        action_frame.pack(fill=tk.X)
+
+        self.btn_disable = ttk.Button(action_frame, text="🚫 비활성화 (숨기기)", command=self.disable_app)
         self.btn_disable.pack(side=tk.LEFT, padx=5)
 
-        self.btn_enable = ttk.Button(top_frame, text="✅ 다시 활성화", command=self.enable_app)
+        self.btn_enable = ttk.Button(action_frame, text="✅ 다시 활성화", command=self.enable_app)
         self.btn_enable.pack(side=tk.LEFT, padx=5)
 
-        self.btn_delete = ttk.Button(top_frame, text="🗑 완전 삭제", command=self.delete_app)
+        self.btn_delete = ttk.Button(action_frame, text="🗑 완전 삭제", command=self.delete_app)
         self.btn_delete.pack(side=tk.LEFT, padx=5)
 
-        self.btn_restore = ttk.Button(top_frame, text="♻️ 완전 복원", command=self.restore_app)
+        self.btn_restore = ttk.Button(action_frame, text="♻️ 완전 복원", command=self.restore_app)
         self.btn_restore.pack(side=tk.LEFT, padx=5)
 
         # 프리셋 버튼 영역
@@ -94,6 +101,27 @@ class AndroidAppManager:
 
         self.all_apps = []
         self.checked_apps = set()
+
+        # 기기 연결 체크 타이머 시작
+        self.check_connection()
+
+    def check_connection(self):
+        output = run_adb_command("devices")
+        lines = output.strip().split('\n')
+        
+        connected = False
+        # 첫 번째 줄은 "List of devices attached" 이므로 제외하고 확인
+        for line in lines[1:]:
+            if "device" in line and "offline" not in line and "unauthorized" not in line:
+                connected = True
+                break
+                
+        if connected:
+            self.lbl_status.config(text="🟢 스마트폰 연결됨", fg="green")
+        else:
+            self.lbl_status.config(text="🔴 연결 안됨 (USB 확인)", fg="red")
+            
+        self.root.after(3000, self.check_connection)
 
     def load_apps(self):
         # -u 인자를 추가하여 비활성화/삭제된 언인스톨 상태의 기본 앱도 모두 가져옵니다 (복원을 위함)
