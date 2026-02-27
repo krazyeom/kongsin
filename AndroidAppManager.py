@@ -55,6 +55,10 @@ class AndroidAppManager:
         self.search_entry = ttk.Entry(search_frame, textvariable=self.search_var)
         self.search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
+        # 선택된 개수 표시 라벨
+        self.lbl_selected_count = tk.Label(search_frame, text="0개가 선택되었습니다.", fg="gray", font=("Helvetica", 14, "bold"))
+        self.lbl_selected_count.pack(side=tk.RIGHT, padx=10)
+
         # 리스트 영역
         list_frame = ttk.Frame(root, padding=10)
         list_frame.pack(fill=tk.BOTH, expand=True)
@@ -66,10 +70,14 @@ class AndroidAppManager:
         self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=self.tree.yview)
 
-        style.configure("Treeview", rowheight=30, font=("Helvetica", 14))
-        self.tree.column("#0", width=40, stretch=False, anchor="center")
+        style.configure("Treeview", rowheight=35, font=("Helvetica", 14))
+        self.tree.column("#0", width=50, stretch=False, anchor="center")
         self.tree.column("App", stretch=True)
         self.tree.bind('<ButtonRelease-1>', self.toggle_check)
+
+        # 선택 시 배경색상 적용을 위한 태그 설정
+        self.tree.tag_configure("checked", background="#D3E8FF")
+        self.tree.tag_configure("unchecked", background="white")
 
         self.all_apps = []
         self.checked_apps = set()
@@ -91,7 +99,15 @@ class AndroidAppManager:
             
         self.all_apps.sort()
         self.update_listbox(self.all_apps)
+        self.update_selected_count_label()
         messagebox.showinfo("성공", f"총 {len(self.all_apps)}개의 앱을 불러왔습니다.")
+
+    def update_selected_count_label(self):
+        count = len(self.checked_apps)
+        if count > 0:
+            self.lbl_selected_count.config(text=f"{count}개가 선택되었습니다.", fg="red")
+        else:
+            self.lbl_selected_count.config(text="0개가 선택되었습니다.", fg="gray")
 
     def select_kongsin_apps(self):
         # 공신폰을 만들기 위해 비활성화해야 할 대표적인 방해 앱 패키지 목록
@@ -127,6 +143,7 @@ class AndroidAppManager:
                 
         if found_count > 0:
             self.filter_list() # 리스트 갱신 (체크상태 화면에 반영)
+            self.update_selected_count_label()
             messagebox.showinfo("공신폰 모드 준비", f"스터디 방해 앱 {found_count}개를 자동으로 체크했습니다!\n\n이제 [🚫 비활성화] 버튼을 눌러주시면 폰에서 사라집니다.")
         else:
             messagebox.showwarning("알림", "폰에서 해당되는 방해 앱을 찾을 수 없습니다. (이미 없거나 비활성화 상태일 수 있습니다)")
@@ -137,19 +154,21 @@ class AndroidAppManager:
             # 클릭한 영역이 체크박스 영역 근처일 때만 반응하도록 x좌표 체크 (옵션)
             app_name = self.tree.item(item, "values")[0]
             current_text = self.tree.item(item, "text")
-            if current_text == "☐":
-                self.tree.item(item, text="☑")
+            if current_text == "⬜":
+                self.tree.item(item, text="✅", tags=("checked",))
                 self.checked_apps.add(app_name)
             else:
-                self.tree.item(item, text="☐")
+                self.tree.item(item, text="⬜", tags=("unchecked",))
                 self.checked_apps.discard(app_name)
+            self.update_selected_count_label()
 
     def update_listbox(self, app_list):
         for item in self.tree.get_children():
             self.tree.delete(item)
         for app in app_list:
-            chk = "☑" if app in self.checked_apps else "☐"
-            self.tree.insert("", "end", text=chk, values=(app,))
+            chk = "✅" if app in self.checked_apps else "⬜"
+            tag = "checked" if app in self.checked_apps else "unchecked"
+            self.tree.insert("", "end", text=chk, values=(app,), tags=(tag,))
 
     def filter_list(self, *args):
         search_term = self.search_var.get().lower()
